@@ -1,6 +1,6 @@
 import type { Platform } from "@/types";
 import { PLATFORMS, getPlatformLabel } from "@/utils/dataHelpers";
-import { Search, X } from "lucide-react";
+import { SearchBar } from "./SearchBar";
 
 interface PlatformFilterProps {
   selected: Platform;
@@ -78,27 +78,13 @@ export function PlatformFilter({
         </div>
       </div>
 
-      {/* Modern Search Input */}
-      <div className="relative w-full md:max-w-md">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-          <Search className="w-4 h-4" />
-        </div>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={`Search ${getPlatformLabel(selected)} creators...`}
-          className="w-full pl-10 pr-10 py-2.5 bg-[#030712] text-sm text-white placeholder-slate-500 border border-white/5 hover:border-white/10 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 rounded-xl transition-all outline-none"
-        />
-        {searchQuery && (
-          <button
-            onClick={() => onSearchChange("")}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+      {/* Reusable Search Bar Component */}
+      <SearchBar
+        value={searchQuery}
+        onChange={onSearchChange}
+        placeholder={`Search ${getPlatformLabel(selected)} creators...`}
+        className="md:max-w-md"
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { formatFollowers } from "@/utils/formatters";
 import { loadProfileByUsername } from "@/utils/profileLoader";
 import { useListStore } from "@/store/useListStore";
 import { Avatar } from "@/components/Avatar";
+import { MetricCard } from "@/components/MetricCard";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -203,135 +204,70 @@ export function ProfileDetailPage() {
 
       {/* Metrics Dashboard Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-        {/* Metric Card - Followers */}
-        <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-white/10 flex flex-col justify-between h-32 relative overflow-hidden group">
-          <div className="absolute -bottom-2 -right-2 text-white/5 w-16 h-16 pointer-events-none group-hover:scale-110 transition-transform">
-            <Users className="w-full h-full" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-              <Users className="w-3.5 h-3.5 text-violet-400" />
-              <span>Followers</span>
-            </div>
-            <div className="text-2xl font-extrabold text-white mt-1.5">
-              {formatFollowers(user.followers)}
-            </div>
-          </div>
-          <div className="text-[11px] text-slate-400">Total Audience</div>
-        </div>
+        <MetricCard
+          icon={Users}
+          label="Followers"
+          value={formatFollowers(user.followers)}
+          subtext="Total Audience"
+          colorClass="text-violet-400"
+        />
 
-        {/* Metric Card - Engagement */}
-        <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-white/10 flex flex-col justify-between h-32 relative overflow-hidden group">
-          <div className="absolute -bottom-2 -right-2 text-white/5 w-16 h-16 pointer-events-none group-hover:scale-110 transition-transform">
-            <Activity className="w-full h-full" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-              <Activity className="w-3.5 h-3.5 text-pink-400" />
-              <span>Engagement</span>
-            </div>
-            <div className="text-2xl font-extrabold text-white mt-1.5">
-              {user.engagement_rate !== undefined
-                ? (user.engagement_rate * 100).toFixed(2) + "%"
-                : "N/A"}
-            </div>
-          </div>
-          <div className="text-[11px] text-slate-400">Interaction Ratio</div>
-        </div>
+        <MetricCard
+          icon={Activity}
+          label="Engagement"
+          value={user.engagement_rate !== undefined ? (user.engagement_rate * 100).toFixed(2) + "%" : "N/A"}
+          subtext="Interaction Ratio"
+          colorClass="text-pink-400"
+        />
 
-        {/* Metric Card - Posts */}
         {user.posts_count !== undefined && (
-          <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-white/10 flex flex-col justify-between h-32 relative overflow-hidden group">
-            <div className="absolute -bottom-2 -right-2 text-white/5 w-16 h-16 pointer-events-none group-hover:scale-110 transition-transform">
-              <Layers className="w-full h-full" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                <Layers className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Posts</span>
-              </div>
-              <div className="text-2xl font-extrabold text-white mt-1.5">
-                {user.posts_count.toLocaleString()}
-              </div>
-            </div>
-            <div className="text-[11px] text-slate-400">Total Publications</div>
-          </div>
+          <MetricCard
+            icon={Layers}
+            label="Posts"
+            value={user.posts_count.toLocaleString()}
+            subtext="Total Publications"
+            colorClass="text-cyan-400"
+          />
         )}
 
-        {/* Metric Card - Avg Likes */}
         {user.avg_likes !== undefined && (
-          <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-white/10 flex flex-col justify-between h-32 relative overflow-hidden group">
-            <div className="absolute -bottom-2 -right-2 text-white/5 w-16 h-16 pointer-events-none group-hover:scale-110 transition-transform">
-              <Heart className="w-full h-full" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                <Heart className="w-3.5 h-3.5 text-red-500" />
-                <span>Avg Likes</span>
-              </div>
-              <div className="text-2xl font-extrabold text-white mt-1.5">
-                {formatFollowers(user.avg_likes)}
-              </div>
-            </div>
-            <div className="text-[11px] text-slate-400">Average Likes/Post</div>
-          </div>
+          <MetricCard
+            icon={Heart}
+            label="Avg Likes"
+            value={formatFollowers(user.avg_likes)}
+            subtext="Average Likes/Post"
+            colorClass="text-red-500"
+          />
         )}
 
-        {/* Metric Card - Avg Comments */}
         {user.avg_comments !== undefined && (
-          <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-white/10 flex flex-col justify-between h-32 relative overflow-hidden group">
-            <div className="absolute -bottom-2 -right-2 text-white/5 w-16 h-16 pointer-events-none group-hover:scale-110 transition-transform">
-              <MessageSquare className="w-full h-full" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Avg Comments</span>
-              </div>
-              <div className="text-2xl font-extrabold text-white mt-1.5">
-                {user.avg_comments.toLocaleString()}
-              </div>
-            </div>
-            <div className="text-[11px] text-slate-400">Average Comments/Post</div>
-          </div>
+          <MetricCard
+            icon={MessageSquare}
+            label="Avg Comments"
+            value={user.avg_comments.toLocaleString()}
+            subtext="Average Comments/Post"
+            colorClass="text-indigo-400"
+          />
         )}
 
-        {/* Metric Card - Avg Views */}
         {user.avg_views !== undefined && user.avg_views > 0 && (
-          <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-white/10 flex flex-col justify-between h-32 relative overflow-hidden group">
-            <div className="absolute -bottom-2 -right-2 text-white/5 w-16 h-16 pointer-events-none group-hover:scale-110 transition-transform">
-              <Eye className="w-full h-full" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                <Eye className="w-3.5 h-3.5 text-amber-400" />
-                <span>Avg Views</span>
-              </div>
-              <div className="text-2xl font-extrabold text-white mt-1.5">
-                {formatFollowers(user.avg_views)}
-              </div>
-            </div>
-            <div className="text-[11px] text-slate-400">Average Video Views</div>
-          </div>
+          <MetricCard
+            icon={Eye}
+            label="Avg Views"
+            value={formatFollowers(user.avg_views)}
+            subtext="Average Video Views"
+            colorClass="text-amber-400"
+          />
         )}
 
-        {/* Metric Card - Avg Reels Plays */}
         {user.avg_reels_plays !== undefined && user.avg_reels_plays > 0 && (
-          <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-white/10 flex flex-col justify-between h-32 relative overflow-hidden group">
-            <div className="absolute -bottom-2 -right-2 text-white/5 w-16 h-16 pointer-events-none group-hover:scale-110 transition-transform">
-              <CirclePlay className="w-full h-full" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                <CirclePlay className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Reels Plays</span>
-              </div>
-              <div className="text-2xl font-extrabold text-white mt-1.5">
-                {formatFollowers(user.avg_reels_plays)}
-              </div>
-            </div>
-            <div className="text-[11px] text-slate-400">Average Reels Plays</div>
-          </div>
+          <MetricCard
+            icon={CirclePlay}
+            label="Reels Plays"
+            value={formatFollowers(user.avg_reels_plays)}
+            subtext="Average Reels Plays"
+            colorClass="text-emerald-400"
+          />
         )}
 
         {/* Metric Card - Demographics */}
