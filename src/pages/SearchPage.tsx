@@ -1,16 +1,26 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { Platform } from "@/types";
 import { Layout } from "@/components/Layout";
 import { PlatformFilter } from "@/components/PlatformFilter";
 import { ProfileList } from "@/components/ProfileList";
 import { extractProfiles, filterProfiles } from "@/utils/dataHelpers";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export function SearchPage() {
   const [platform, setPlatform] = useState<Platform>("instagram");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const allProfiles = extractProfiles(platform);
-  const filtered = filterProfiles(allProfiles, searchQuery);
+  // Debounce the query: filtering only fires after 200ms of no typing
+  const debouncedQuery = useDebounce(searchQuery, 200);
+
+  const allProfiles = useMemo(() => extractProfiles(platform), [platform]);
+  // Use debouncedQuery so the grid doesn't re-render on every single keystroke
+  const filtered = useMemo(() => filterProfiles(allProfiles, debouncedQuery), [allProfiles, debouncedQuery]);
+
+  const handlePlatformChange = useCallback((p: Platform) => {
+    setPlatform(p);
+    setSearchQuery("");
+  }, []);
 
   return (
     <Layout title="Discover Top Creators">
@@ -20,10 +30,7 @@ export function SearchPage() {
 
       <PlatformFilter
         selected={platform}
-        onChange={(p) => {
-          setPlatform(p);
-          setSearchQuery("");
-        }}
+        onChange={handlePlatformChange}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
@@ -40,7 +47,7 @@ export function SearchPage() {
       <ProfileList
         profiles={filtered}
         platform={platform}
-        searchQuery={searchQuery}
+        searchQuery={debouncedQuery}
         onProfileClick={() => {}}
       />
     </Layout>

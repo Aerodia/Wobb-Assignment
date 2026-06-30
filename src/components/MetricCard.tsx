@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { LucideIcon } from "lucide-react";
 
 interface MetricCardProps {
@@ -8,7 +9,7 @@ interface MetricCardProps {
   colorClass?: string;
 }
 
-export function MetricCard({
+const MetricCardComponent = function MetricCard({
   icon: Icon,
   label,
   value,
@@ -32,4 +33,8 @@ export function MetricCard({
       <div className="text-[11px] text-slate-400">{subtext}</div>
     </div>
   );
-}
+};
+
+// Pure presentational component — memo prevents re-renders when parent
+// (ProfileDetailPage) cycles through loading states.
+export const MetricCard = memo(MetricCardComponent);

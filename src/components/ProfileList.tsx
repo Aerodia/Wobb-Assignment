@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import type { Platform, UserProfileSummary } from "@/types";
 import { ProfileCard } from "./ProfileCard";
 import { Sparkles } from "lucide-react";
@@ -15,6 +16,13 @@ export function ProfileList({
   searchQuery,
   onProfileClick,
 }: ProfileListProps) {
+  // Stable callback wrapper ensures ProfileCard memo isn't busted by
+  // a new function reference on each parent render.
+  const stableOnProfileClick = useCallback(
+    (username: string) => onProfileClick(username),
+    [onProfileClick]
+  );
+
   if (profiles.length === 0) {
     return (
       <div className="glass-card p-12 rounded-2xl border border-white/5 text-center flex flex-col items-center justify-center max-w-md mx-auto my-12">
@@ -37,9 +45,10 @@ export function ProfileList({
           profile={profile}
           platform={platform}
           searchQuery={searchQuery}
-          onProfileClick={onProfileClick}
+          onProfileClick={stableOnProfileClick}
         />
       ))}
     </div>
   );
 }
+

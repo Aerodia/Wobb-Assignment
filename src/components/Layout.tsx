@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useCallback, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useListStore } from "@/store/useListStore";
 import { 
@@ -21,7 +21,7 @@ export function Layout({ children, title }: LayoutProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     if (selectedProfiles.length === 0) return;
     const exportText = selectedProfiles
       .map((p) => `@${p.username || p.handle || "creator"} (${p.platform})`)
@@ -29,7 +29,7 @@ export function Layout({ children, title }: LayoutProps) {
     navigator.clipboard.writeText(exportText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
+  }, [selectedProfiles]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#080c14]">

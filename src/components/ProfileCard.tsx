@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Platform, UserProfileSummary } from "@/types";
 import { VerifiedBadge } from "./VerifiedBadge";
@@ -51,31 +52,41 @@ function PlatformIndicator({ platform }: { platform: Platform }) {
   );
 }
 
-export function ProfileCard({
+function ProfileCardComponent({
   profile,
   platform,
   searchQuery,
   onProfileClick,
 }: ProfileCardProps) {
   const navigate = useNavigate();
-  const { addProfile, removeProfile, isInList } = useListStore();
-  
-  const isSelected = isInList(profile.user_id);
 
-  const handleClick = () => {
+  // Granular selectors — each card only re-renders when ITS own selection state changes,
+  // not when any other card is added/removed from the list.
+  const isSelected = useListStore((state) =>
+    state.selectedProfiles.some((p) => p.user_id === profile.user_id)
+  );
+  const addProfile = useListStore((state) => state.addProfile);
+  const removeProfile = useListStore((state) => state.removeProfile);
+
+  const handleClick = useCallback(() => {
     const activeUsername = profile.username || profile.handle || "creator";
     if (onProfileClick) onProfileClick(activeUsername);
     navigate(`/profile/${activeUsername}?platform=${platform}`);
-  };
+  }, [navigate, onProfileClick, platform, profile.handle, profile.username]);
 
-  const handleToggleList = (e: React.MouseEvent) => {
+  const handleToggleList = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (isSelected) {
       removeProfile(profile.user_id);
     } else {
       addProfile(profile, platform);
     }
-  };
+  }, [addProfile, isSelected, platform, profile, removeProfile]);
+
+  const handleViewDetails = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleClick();
+  }, [handleClick]);
 
   return (
     <div
@@ -159,10 +170,7 @@ export function ProfileCard({
           )}
         </button>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleClick();
-          }}
+          onClick={handleViewDetails}
           className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
           title="View Details"
         >
@@ -172,3 +180,9 @@ export function ProfileCard({
     </div>
   );
 }
+
+// React.memo: only re-renders if profile, platform, or searchQuery changes.
+// Combined with granular Zustand selectors, saving a creator only re-renders that one card.
+export const ProfileCard = memo(ProfileCardComponent);
+
+
