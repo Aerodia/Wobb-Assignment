@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { Platform, UserProfileSummary } from "@/types";
 import { ProfileCard } from "./ProfileCard";
-import { Sparkles } from "lucide-react";
+import { SearchX } from "lucide-react";
 
 interface ProfileListProps {
   profiles: UserProfileSummary[];
@@ -10,14 +10,7 @@ interface ProfileListProps {
   onProfileClick: (username: string) => void;
 }
 
-export function ProfileList({
-  profiles,
-  platform,
-  searchQuery,
-  onProfileClick,
-}: ProfileListProps) {
-  // Stable callback wrapper ensures ProfileCard memo isn't busted by
-  // a new function reference on each parent render.
+export function ProfileList({ profiles, platform, searchQuery, onProfileClick }: ProfileListProps) {
   const stableOnProfileClick = useCallback(
     (username: string) => onProfileClick(username),
     [onProfileClick]
@@ -25,20 +18,28 @@ export function ProfileList({
 
   if (profiles.length === 0) {
     return (
-      <div className="glass-card p-12 rounded-2xl border border-white/5 text-center flex flex-col items-center justify-center max-w-md mx-auto my-12">
-        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-slate-500 mb-4 animate-bounce">
-          <Sparkles className="w-6 h-6" />
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+          style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
+        >
+          <SearchX className="w-5 h-5 text-[var(--text-muted)]" />
         </div>
-        <h3 className="text-lg font-bold text-white mb-1">No Creators Found</h3>
-        <p className="text-sm text-slate-400">
-          We couldn't find any creators matching "{searchQuery}" on {platform}. Try a different search term or check spelling.
-        </p>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">No creators found</h3>
+        {searchQuery ? (
+          <p className="text-xs text-[var(--text-muted)] max-w-xs">
+            No results for <span className="font-medium text-[var(--text-secondary)]">"{searchQuery}"</span>.
+            Try a different name or handle.
+          </p>
+        ) : (
+          <p className="text-xs text-[var(--text-muted)]">No creators available for this platform.</p>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {profiles.map((profile) => (
         <ProfileCard
           key={profile.user_id}
@@ -51,4 +52,3 @@ export function ProfileList({
     </div>
   );
 }
-
