@@ -4,7 +4,7 @@ import type { Platform, UserProfileSummary } from "@/types";
 import { VerifiedBadge } from "./VerifiedBadge";
 import { useListStore } from "@/store/useListStore";
 import { formatFollowers, formatEngagementRate } from "@/utils/formatters";
-import { Bookmark, BookmarkCheck, ArrowUpRight } from "lucide-react";
+import { Bookmark, BookmarkCheck, ArrowUpRight, TrendingUp } from "lucide-react";
 import { Avatar } from "./Avatar";
 
 interface ProfileCardProps {
@@ -12,30 +12,30 @@ interface ProfileCardProps {
   platform: Platform;
   searchQuery: string;
   onProfileClick?: (username: string) => void;
-  /** Grid position — used to stagger the card entry animation */
   index?: number;
 }
+
+const PLATFORM_META = {
+  instagram: { bar: "platform-bar-instagram", color: "var(--instagram-color)", cardClass: "card-instagram" },
+  youtube:   { bar: "platform-bar-youtube",   color: "var(--youtube-color)",   cardClass: "card-youtube" },
+  tiktok:    { bar: "platform-bar-tiktok",    color: "var(--tiktok-color)",    cardClass: "card-tiktok" },
+};
 
 function EngagementBadge({ rate }: { rate?: number }) {
   if (rate === undefined) return null;
   const pct = rate * 100;
-  if (pct >= 3)  return <span className="badge badge-high">{pct.toFixed(1)}% eng.</span>;
-  if (pct >= 1)  return <span className="badge badge-medium">{pct.toFixed(1)}% eng.</span>;
-  return             <span className="badge badge-low">{pct.toFixed(1)}% eng.</span>;
-}
-
-function PlatformBadge({ platform }: { platform: Platform }) {
-  return <span className={`badge badge-${platform}`}>{platform}</span>;
+  if (pct >= 3)  return <span className="badge badge-high">{pct.toFixed(1)}%</span>;
+  if (pct >= 1)  return <span className="badge badge-medium">{pct.toFixed(1)}%</span>;
+  return             <span className="badge badge-low">{pct.toFixed(1)}%</span>;
 }
 
 function ProfileCardComponent({ profile, platform, onProfileClick, index = 0 }: ProfileCardProps) {
   const navigate = useNavigate();
+  const meta = PLATFORM_META[platform];
 
-  const isSelected   = useListStore((s) => s.selectedProfiles.some((p) => p.user_id === profile.user_id));
-  const addProfile   = useListStore((s) => s.addProfile);
+  const isSelected    = useListStore((s) => s.selectedProfiles.some((p) => p.user_id === profile.user_id));
+  const addProfile    = useListStore((s) => s.addProfile);
   const removeProfile = useListStore((s) => s.removeProfile);
-
-  // Drives the icon-pop animation on the bookmark when saving
   const [justSaved, setJustSaved] = useState(false);
 
   const username    = profile.username || profile.handle || "creator";
@@ -52,7 +52,6 @@ function ProfileCardComponent({ profile, platform, onProfileClick, index = 0 }: 
       removeProfile(profile.user_id);
     } else {
       addProfile(profile, platform);
-      // Trigger pop animation briefly
       setJustSaved(true);
       setTimeout(() => setJustSaved(false), 500);
     }
@@ -65,99 +64,119 @@ function ProfileCardComponent({ profile, platform, onProfileClick, index = 0 }: 
 
   const secondStat = useMemo(() => {
     if (profile.engagement_rate !== undefined)
-      return { value: formatEngagementRate(profile.engagement_rate), label: "Engagement" };
+      return { value: formatEngagementRate(profile.engagement_rate), label: "Engagement", icon: TrendingUp };
     if (profile.avg_views !== undefined && profile.avg_views > 0)
-      return { value: formatFollowers(profile.avg_views), label: "Avg Views" };
+      return { value: formatFollowers(profile.avg_views), label: "Avg Views", icon: TrendingUp };
     return null;
   }, [profile.avg_views, profile.engagement_rate]);
 
-  // Stagger delay capped at 8 cards to avoid long waits on large grids
-  const staggerDelay = `${Math.min(index, 8) * 45}ms`;
+  const staggerDelay = `${Math.min(index, 8) * 50}ms`;
 
   return (
     <div
       onClick={handleClick}
-      className="surface-card p-5 flex flex-col gap-4 cursor-pointer relative anim-fade-in-up"
-      style={{ borderRadius: "12px", animationDelay: staggerDelay }}
+      className={`surface-card ${meta.cardClass} cursor-pointer flex flex-col anim-fade-in-up`}
+      style={{ borderRadius: "14px", animationDelay: staggerDelay }}
     >
-      {/* Top row: Avatar + name + badges */}
-      <div className="flex items-start gap-3">
-        <div className="relative flex-shrink-0">
-          <Avatar
-            src={profile.picture}
-            alt={profile.fullname}
-            className="w-12 h-12 rounded-full object-cover transition-transform duration-200 group-hover:scale-105"
-            fallbackText={username}
-          />
-          {profile.is_verified && (
-            <span className="absolute -bottom-0.5 -right-0.5">
-              <VerifiedBadge verified />
-            </span>
-          )}
+      {/* Platform colour accent bar */}
+      <div className={`h-0.5 w-full ${meta.bar} rounded-t-[14px] flex-shrink-0`} />
+
+      <div className="p-5 flex flex-col gap-4 flex-1">
+        {/* Top row: Avatar + name + badges */}
+        <div className="flex items-start gap-3">
+          {/* Avatar with platform-coloured ring */}
+          <div
+            className="relative flex-shrink-0 rounded-full p-[2px]"
+            style={{ background: `linear-gradient(135deg, ${meta.color}66, ${meta.color}22)` }}
+          >
+            <div className="rounded-full overflow-hidden" style={{ background: "var(--bg-base)" }}>
+              <Avatar
+                src={profile.picture}
+                alt={profile.fullname}
+                className="w-11 h-11 rounded-full object-cover block"
+                fallbackText={username}
+              />
+            </div>
+            {profile.is_verified && (
+              <span className="absolute -bottom-0.5 -right-0.5">
+                <VerifiedBadge verified />
+              </span>
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
+                {displayName}
+              </span>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] truncate mt-0.5 leading-snug">{profile.fullname}</p>
+            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+              <span className={`badge badge-${platform}`}>{platform}</span>
+              <EngagementBadge rate={profile.engagement_rate} />
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-sm font-semibold text-[var(--text-primary)] truncate">
-              {displayName}
-            </span>
-          </div>
-          <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">{profile.fullname}</p>
-          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-            <PlatformBadge platform={platform} />
-            <EngagementBadge rate={profile.engagement_rate} />
-          </div>
-        </div>
-      </div>
-
-      {/* Stats row */}
-      <div
-        className="grid gap-px rounded-lg overflow-hidden"
-        style={{ gridTemplateColumns: secondStat ? "1fr 1fr" : "1fr", background: "var(--border-subtle)" }}
-      >
-        <div className="py-3 px-3 flex flex-col gap-0.5" style={{ background: "var(--bg-base)" }}>
-          <span className="text-[15px] font-bold text-[var(--text-primary)] tabular-nums">
-            {formatFollowers(profile.followers)}
-          </span>
-          <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wide">Followers</span>
-        </div>
-        {secondStat && (
+        {/* Stats row */}
+        <div
+          className="grid gap-px rounded-xl overflow-hidden flex-1"
+          style={{ gridTemplateColumns: secondStat ? "1fr 1fr" : "1fr", background: "var(--border-subtle)" }}
+        >
           <div className="py-3 px-3 flex flex-col gap-0.5" style={{ background: "var(--bg-base)" }}>
-            <span className="text-[15px] font-bold text-[var(--text-primary)] tabular-nums">{secondStat.value}</span>
-            <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wide">{secondStat.label}</span>
+            <span className="text-[16px] font-black text-[var(--text-primary)] tabular-nums leading-none">
+              {formatFollowers(profile.followers)}
+            </span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mt-0.5">
+              Followers
+            </span>
           </div>
-        )}
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleToggle}
-          className={`press-active ${isSelected ? "btn-saved flex-1 justify-center" : "btn-ghost flex-1 justify-center"}`}
-          style={{ padding: "7px 12px", fontSize: "12px" }}
-          title={isSelected ? "Remove from list" : "Save to list"}
-        >
-          {isSelected ? (
-            <>
-              {/* Show pop animation on the icon right when saved */}
-              <BookmarkCheck className={`w-3.5 h-3.5 ${justSaved ? "anim-icon-pop" : ""}`} />
-              <span>Saved</span>
-            </>
-          ) : (
-            <>
-              <Bookmark className="w-3.5 h-3.5" />
-              <span>Save</span>
-            </>
+          {secondStat && (
+            <div className="py-3 px-3 flex flex-col gap-0.5" style={{ background: "var(--bg-base)" }}>
+              <span
+                className="text-[16px] font-black tabular-nums leading-none"
+                style={{ color: meta.color }}
+              >
+                {secondStat.value}
+              </span>
+              <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mt-0.5">
+                {secondStat.label}
+              </span>
+            </div>
           )}
-        </button>
-        <button
-          onClick={handleOpen}
-          className="btn-ghost press-active"
-          style={{ padding: "7px 10px" }}
-          title="View profile"
-        >
-          <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </button>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleToggle}
+            className={`press-active flex-1 flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+              isSelected ? "btn-saved" : "btn-ghost"
+            }`}
+            style={{ padding: "7px 10px" }}
+            title={isSelected ? "Remove from list" : "Save to list"}
+          >
+            {isSelected ? (
+              <>
+                <BookmarkCheck className={`w-3.5 h-3.5 ${justSaved ? "anim-icon-pop" : ""}`} />
+                <span>Saved</span>
+              </>
+            ) : (
+              <>
+                <Bookmark className="w-3.5 h-3.5" />
+                <span>Save</span>
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleOpen}
+            className="btn-ghost press-active"
+            style={{ padding: "7px 10px" }}
+            title="View profile"
+          >
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );
