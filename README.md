@@ -10,6 +10,7 @@
 [![Zustand](https://img.shields.io/badge/Zustand-5-FF6B35?style=flat-square)](https://zustand-demo.pmnd.rs/)
 [![ESLint](https://img.shields.io/badge/ESLint-passing-4B32C3?style=flat-square&logo=eslint)](https://eslint.org/)
 [![Build](https://img.shields.io/badge/build-passing-22c55e?style=flat-square)](#)
+[![Deployed](https://img.shields.io/badge/deployed-vercel-000000?style=flat-square&logo=vercel)](https://vibe-coder-assignment-eta.vercel.app)
 
 </div>
 
@@ -22,6 +23,10 @@ Wobb Creator Hub is a fully redesigned influencer marketing tool that lets brand
 ---
 
 ## Quick Start
+
+## Live Demo
+
+**🚀 [vibe-coder-assignment-eta.vercel.app](https://vibe-coder-assignment-eta.vercel.app)**
 
 ```bash
 npm install
