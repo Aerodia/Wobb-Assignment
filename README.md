@@ -197,6 +197,5 @@ All animations use only `transform` and `opacity` — GPU-composited properties 
 
 - **GitHub:** [github.com/Aerodia/Wobb-Assignment](https://github.com/Aerodia/Wobb-Assignment)
 - **Live URL:** [vibe-coder-assignment-eta.vercel.app](https://vibe-coder-assignment-eta.vercel.app)
-- **Deadline:** 2 July 2026, 2:00 PM IST
 
 > `npm run build` passes with zero TypeScript errors and zero ESLint warnings.
