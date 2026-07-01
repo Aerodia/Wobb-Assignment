@@ -33,7 +33,8 @@ function ProfileCardComponent({ profile, platform, onProfileClick, index = 0 }: 
   const navigate = useNavigate();
   const meta = PLATFORM_META[platform];
 
-  const isSelected    = useListStore((s) => s.selectedProfiles.some((p) => p.user_id === profile.user_id));
+  const userId = profile.user_id;
+  const isSelected    = useListStore((s) => s.selectedProfiles.some((p) => p.user_id === userId));
   const addProfile    = useListStore((s) => s.addProfile);
   const removeProfile = useListStore((s) => s.removeProfile);
   const [justSaved, setJustSaved] = useState(false);
@@ -72,11 +73,21 @@ function ProfileCardComponent({ profile, platform, onProfileClick, index = 0 }: 
 
   const staggerDelay = `${Math.min(index, 8) * 50}ms`;
 
+  // Cards beyond the initial 12 are off-screen — skip layout/paint until near viewport
+  const isOffScreen = index >= 12;
+
   return (
     <div
       onClick={handleClick}
       className={`surface-card ${meta.cardClass} cursor-pointer flex flex-col anim-fade-in-up`}
-      style={{ borderRadius: "14px", animationDelay: staggerDelay }}
+      style={{
+        borderRadius: "14px",
+        animationDelay: staggerDelay,
+        ...(isOffScreen ? {
+          contentVisibility: "auto",
+          containIntrinsicSize: "auto none auto 220px",
+        } : {}),
+      }}
     >
       {/* Platform colour accent bar */}
       <div className={`h-0.5 w-full ${meta.bar} rounded-t-[14px] flex-shrink-0`} />
@@ -90,11 +101,13 @@ function ProfileCardComponent({ profile, platform, onProfileClick, index = 0 }: 
             style={{ background: `linear-gradient(135deg, ${meta.color}66, ${meta.color}22)` }}
           >
             <div className="rounded-full overflow-hidden" style={{ background: "var(--bg-base)" }}>
-              <Avatar
+            <Avatar
                 src={profile.picture}
                 alt={profile.fullname}
                 className="w-11 h-11 rounded-full object-cover block"
                 fallbackText={username}
+                lazy={index > 0}
+                fetchPriority={index === 0 ? "high" : undefined}
               />
             </div>
             {profile.is_verified && (

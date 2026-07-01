@@ -11,4 +11,30 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Raise the warning threshold slightly (JSON data chunks can be large)
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Vendor: React runtime
+          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
+            return "vendor-react";
+          }
+          // Vendor: Router
+          if (id.includes("node_modules/react-router")) {
+            return "vendor-router";
+          }
+          // Vendor: Zustand
+          if (id.includes("node_modules/zustand")) {
+            return "vendor-zustand";
+          }
+          // Vendor: Lucide icons (large icon set)
+          if (id.includes("node_modules/lucide-react")) {
+            return "vendor-lucide";
+          }
+        },
+      },
+    },
+  },
 });

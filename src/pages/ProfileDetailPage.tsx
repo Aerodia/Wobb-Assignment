@@ -155,6 +155,8 @@ export function ProfileDetailPage() {
                   alt={user.fullname}
                   className="w-20 h-20 rounded-full object-cover block"
                   fallbackText={user.username || user.handle || "creator"}
+                  lazy={false}
+                  fetchPriority="high"
                 />
               </div>
             </div>

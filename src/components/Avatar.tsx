@@ -5,9 +5,20 @@ interface AvatarProps {
   alt: string;
   className?: string;
   fallbackText: string;
+  /** Set to "high" for the first visible avatar (LCP candidate), omit for all others */
+  fetchPriority?: "high" | "low" | "auto";
+  /** Whether to lazy-load. Default: true (below the fold). Set false for above-fold avatars. */
+  lazy?: boolean;
 }
 
-export function Avatar({ src, alt, className = "", fallbackText }: AvatarProps) {
+export function Avatar({
+  src,
+  alt,
+  className = "",
+  fallbackText,
+  fetchPriority,
+  lazy: lazyLoad = true,
+}: AvatarProps) {
   const [hasError, setHasError] = useState(false);
   const [prevSrc, setPrevSrc] = useState(src);
 
@@ -20,7 +31,6 @@ export function Avatar({ src, alt, className = "", fallbackText }: AvatarProps) 
     ? fallbackText.replace(/^@/, "").charAt(0).toUpperCase()
     : "?";
 
-  // Memoize the gradient so the hash isn't recomputed on every render
   const gradientClass = useMemo(() => {
     let hash = 0;
     for (let i = 0; i < fallbackText.length; i++) {
@@ -38,6 +48,7 @@ export function Avatar({ src, alt, className = "", fallbackText }: AvatarProps) 
       <div
         className={`flex items-center justify-center bg-gradient-to-tr ${gradientClass} font-bold select-none ${className}`}
         title={alt}
+        aria-label={alt}
       >
         {initial}
       </div>
@@ -50,7 +61,9 @@ export function Avatar({ src, alt, className = "", fallbackText }: AvatarProps) 
       alt={alt}
       className={className}
       onError={() => setHasError(true)}
+      loading={lazyLoad ? "lazy" : "eager"}
+      decoding="async"
+      {...(fetchPriority ? { fetchPriority } : {})}
     />
   );
 }
-
